@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.HuishouDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.huishou_name as huishouName
+        ,a.huishou_uuid_number as huishouUuidNumber
+        ,a.huishou_photo as huishouPhoto
+        ,a.huishou_address as huishouAddress
+        ,a.huishou_types as huishouTypes
+        ,a.huishou_kucun_number as huishouKucunNumber
+        ,a.huishou_time as huishouTime
+        ,a.huishou_content as huishouContent
+        ,a.huishou_delete as huishouDelete
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.HuishouView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+
+        FROM huishou  a
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.huishouName != '' and params.huishouName != null and params.huishouName != 'null' ">
+                and a.huishou_name like CONCAT('%',#{params.huishouName},'%')
+            </if>
+            <if test=" params.huishouUuidNumber != '' and params.huishouUuidNumber != null and params.huishouUuidNumber != 'null' ">
+                and a.huishou_uuid_number like CONCAT('%',#{params.huishouUuidNumber},'%')
+            </if>
+            <if test=" params.huishouAddress != '' and params.huishouAddress != null and params.huishouAddress != 'null' ">
+                and a.huishou_address like CONCAT('%',#{params.huishouAddress},'%')
+            </if>
+            <if test="params.huishouTypes != null and params.huishouTypes != ''">
+                and a.huishou_types = #{params.huishouTypes}
+            </if>
+            <if test="params.huishouKucunNumberStart != null and params.huishouKucunNumberStart != ''">
+                <![CDATA[  and a.huishou_kucun_number >= #{params.huishouKucunNumberStart}   ]]>
+            </if>
+            <if test="params.huishouKucunNumberEnd != null and params.huishouKucunNumberEnd != ''">
+                <![CDATA[  and a.huishou_kucun_number <= #{params.huishouKucunNumberEnd}   ]]>
+            </if>
+             <if test="params.huishouKucunNumber != null and params.huishouKucunNumber != ''">
+                and a.huishou_kucun_number = #{params.huishouKucunNumber}
+             </if>
+            <if test=" params.huishouTimeStart != '' and params.huishouTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.huishou_time) >= UNIX_TIMESTAMP(#{params.huishouTimeStart}) ]]>
+            </if>
+            <if test=" params.huishouTimeEnd != '' and params.huishouTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.huishou_time) <= UNIX_TIMESTAMP(#{params.huishouTimeEnd}) ]]>
+            </if>
+            <if test=" params.huishouContent != '' and params.huishouContent != null and params.huishouContent != 'null' ">
+                and a.huishou_content like CONCAT('%',#{params.huishouContent},'%')
+            </if>
+            <if test="params.huishouDeleteStart != null and params.huishouDeleteStart != ''">
+                <![CDATA[  and a.huishou_delete >= #{params.huishouDeleteStart}   ]]>
+            </if>
+            <if test="params.huishouDeleteEnd != null and params.huishouDeleteEnd != ''">
+                <![CDATA[  and a.huishou_delete <= #{params.huishouDeleteEnd}   ]]>
+            </if>
+             <if test="params.huishouDelete != null and params.huishouDelete != ''">
+                and a.huishou_delete = #{params.huishouDelete}
+             </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>

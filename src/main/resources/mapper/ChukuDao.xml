@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.ChukuDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.huishou_yuyue_id as huishouYuyueId
+        ,a.chuku_name as chukuName
+        ,a.chuku_uuid_number as chukuUuidNumber
+        ,a.chuku_photo as chukuPhoto
+        ,a.chuku_address as chukuAddress
+        ,a.chuku_types as chukuTypes
+        ,a.chuku_mudi_address as chukuMudiAddress
+        ,a.chuku_content as chukuContent
+        ,a.chuku_delete as chukuDelete
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.ChukuView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+        ,huishouYuyue.huishou_yuyue_uuid_number as huishouYuyueUuidNumber
+        ,huishouYuyue.yonghu_id as huishouYuyueYonghuId
+        ,huishouYuyue.huishou_yuyue_text as huishouYuyueText
+        ,huishouYuyue.huishou_chuku_time as huishouChukuTime
+        ,huishouYuyue.huishou_yuyue_yesno_types as huishouYuyueYesnoTypes
+        ,huishouYuyue.huishou_yuyue_yesno_text as huishouYuyueYesnoText
+        ,huishouYuyue.huishou_yuyue_shenhe_time as huishouYuyueShenheTime
+
+        FROM chuku  a
+        left JOIN huishou_yuyue huishouYuyue ON a.huishou_yuyue_id = huishouYuyue.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.huishouYuyueId != null and params.huishouYuyueId != ''">
+                and (
+                    a.huishou_yuyue_id = #{params.huishouYuyueId}
+                )
+            </if>
+            <if test=" params.chukuName != '' and params.chukuName != null and params.chukuName != 'null' ">
+                and a.chuku_name like CONCAT('%',#{params.chukuName},'%')
+            </if>
+            <if test=" params.chukuUuidNumber != '' and params.chukuUuidNumber != null and params.chukuUuidNumber != 'null' ">
+                and a.chuku_uuid_number like CONCAT('%',#{params.chukuUuidNumber},'%')
+            </if>
+            <if test=" params.chukuAddress != '' and params.chukuAddress != null and params.chukuAddress != 'null' ">
+                and a.chuku_address like CONCAT('%',#{params.chukuAddress},'%')
+            </if>
+            <if test="params.chukuTypes != null and params.chukuTypes != ''">
+                and a.chuku_types = #{params.chukuTypes}
+            </if>
+            <if test=" params.chukuMudiAddress != '' and params.chukuMudiAddress != null and params.chukuMudiAddress != 'null' ">
+                and a.chuku_mudi_address like CONCAT('%',#{params.chukuMudiAddress},'%')
+            </if>
+            <if test=" params.chukuContent != '' and params.chukuContent != null and params.chukuContent != 'null' ">
+                and a.chuku_content like CONCAT('%',#{params.chukuContent},'%')
+            </if>
+            <if test="params.chukuDeleteStart != null and params.chukuDeleteStart != ''">
+                <![CDATA[  and a.chuku_delete >= #{params.chukuDeleteStart}   ]]>
+            </if>
+            <if test="params.chukuDeleteEnd != null and params.chukuDeleteEnd != ''">
+                <![CDATA[  and a.chuku_delete <= #{params.chukuDeleteEnd}   ]]>
+            </if>
+             <if test="params.chukuDelete != null and params.chukuDelete != ''">
+                and a.chuku_delete = #{params.chukuDelete}
+             </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断垃圾出库申请的id不为空 -->
+            <if test=" params.huishouYuyueIdNotNull != '' and params.huishouYuyueIdNotNull != null and params.huishouYuyueIdNotNull != 'null' ">
+                and a.huishou_yuyue_id IS NOT NULL
+            </if>
+            <if test=" params.huishouYuyueUuidNumber != '' and params.huishouYuyueUuidNumber != null and params.huishouYuyueUuidNumber != 'null' ">
+                and huishouYuyue.huishou_yuyue_uuid_number like CONCAT('%',#{params.huishouYuyueUuidNumber},'%')
+            </if>
+            <if test="params.huishouId != null  and params.huishouId != ''">
+                and huishouYuyue.huishou_id = #{params.huishouId}
+            </if>
+            <if test="params.yonghuId != null  and params.yonghuId != ''">
+                and huishouYuyue.yonghu_id = #{params.yonghuId}
+            </if>
+            <if test=" params.huishouYuyueText != '' and params.huishouYuyueText != null and params.huishouYuyueText != 'null' ">
+                and huishouYuyue.huishou_yuyue_text like CONCAT('%',#{params.huishouYuyueText},'%')
+            </if>
+            <if test=" params.huishouChukuTimeStart != '' and params.huishouChukuTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(huishouYuyue.huishou_chuku_time) >= UNIX_TIMESTAMP(#{params.huishouChukuTimeStart}) ]]>
+            </if>
+            <if test=" params.huishouChukuTimeEnd != '' and params.huishouChukuTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(huishouYuyue.huishou_chuku_time) <= UNIX_TIMESTAMP(#{params.huishouChukuTimeEnd}) ]]>
+            </if>
+            <if test="params.huishouYuyueYesnoTypes != null  and params.huishouYuyueYesnoTypes != ''">
+                and huishouYuyue.huishou_yuyue_yesno_types = #{params.huishouYuyueYesnoTypes}
+            </if>
+
+            <if test=" params.huishouYuyueYesnoText != '' and params.huishouYuyueYesnoText != null and params.huishouYuyueYesnoText != 'null' ">
+                and huishouYuyue.huishou_yuyue_yesno_text like CONCAT('%',#{params.huishouYuyueYesnoText},'%')
+            </if>
+            <if test=" params.huishouYuyueShenheTimeStart != '' and params.huishouYuyueShenheTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(huishouYuyue.huishou_yuyue_shenhe_time) >= UNIX_TIMESTAMP(#{params.huishouYuyueShenheTimeStart}) ]]>
+            </if>
+            <if test=" params.huishouYuyueShenheTimeEnd != '' and params.huishouYuyueShenheTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(huishouYuyue.huishou_yuyue_shenhe_time) <= UNIX_TIMESTAMP(#{params.huishouYuyueShenheTimeEnd}) ]]>
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(huishouYuyue.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(huishouYuyue.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>
